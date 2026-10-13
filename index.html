@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JUST FOR YOU ♥</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #fff0f5 0%, #fbc2eb 100%);
+            font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* القلوب المتساقطة في الخلفية */
+        .heart-bg {
+            position: absolute;
+            color: #ff69b4;
+            font-size: 20px;
+            opacity: 0.3;
+            animation: fall linear infinite;
+            z-index: 1;
+            user-select: none;
+        }
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.5; }
+            90% { opacity: 0.5; }
+            100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+
+        .container {
+            text-align: center;
+            z-index: 10;
+            padding: 20px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .title {
+            color: #c2185b;
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+        }
+
+        /* تصميم كارت الكتاب أو المفكرة الورقية الوردي */
+        .wish-book {
+            background: #ffffff;
+            border-left: 15px solid #d81b60; 
+            border-radius: 10px 20px 20px 10px;
+            padding: 40px 30px;
+            min-height: 250px;
+            box-shadow: 0 10px 30px rgba(216, 27, 96, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .page-content {
+            font-size: 1.4rem;
+            color: #4a001f;
+            line-height: 1.7;
+            font-weight: bold;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* أرقام الصفحات بالأسفل */
+        .page-number {
+            position: absolute;
+            bottom: 15px;
+            left: 20px;
+            font-size: 0.9rem;
+            color: #ff4081;
+        }
+
+        /* تصميم أزرار التحكم بالتنقل */
+        .navigation-btns {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .btn {
+            background-color: #d81b60;
+            color: #fff;
+            border: none;
+            padding: 10px 25px;
+            font-size: 1.1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(216, 27, 96, 0.2);
+            transition: all 0.3s ease;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn:hover {
+            background-color: #ff4081;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background-color: #fbc2eb;
+            color: #c2185b;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="hearts-container"></div>
+
+    <div class="container">
+        <div class="title">📖 كِتَابُ الأُمْنِيَاتِ لِـ نُورِي ♥</div>
+        
+        <div class="wish-book">
+            <div class="page-content" id="page-text">يَا مَن بِقُربِهَا مُرُّ الحَيَاةِ يَطِيبُ</div>
+            <div class="page-number" id="page-num">صفحة 1 من 6</div>
+        </div>
+
+        <div class="navigation-btns">
+            <button class="btn" id="prev-btn" onclick="prevPage()" disabled>◀ السابق</button>
+            <button class="btn" id="next-btn" onclick="nextPage()">التالي ▶</button>
+        </div>
+    </div>
+
+    <script>
+        // نصوص صوركِ بالتفصيل فقط بعد حذف الجملة الأخيرة
+        const pages = [
+            "يَا مَن بِقُربِهَا مُرُّ الحَيَاةِ يَطِيبُ",
+            "\"إِنَّمَا الرِّفَاقُ لِلرِّفَاقِ أَوطَانُ\"",
+            "الصَّدِيقُ جُزءٌ مِنَ الرُّوحِ وَأَنتِ كُلُّ رُوحِي",
+            "مَعَ مَن تُحِبّ تَجِد فِي أَبسَطِ الأَشيَاءِ فَرَحًا.",
+            "\"إِن كَانَ فِي صُدَفِ الأَزمَانِ رَائِعَةٌ فَإِنَّكِ خَيرُ مَا جَادَت بِهِ الصُّدَفُ\"",
+            "مَكَانًا تَألَفُه، وَرَفِيقًا يَألَفُك ."
+        ];
+
+        let currentPage = 0;
+
+        const pageTextElement = document.getElementById('page-text');
+        const pageNumElement = document.getElementById('page-num');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+
+        function updateBook() {
+            pageTextElement.style.animation = 'none';
+            pageTextElement.offsetHeight; 
+            pageTextElement.innerText = pages[currentPage];
+            pageTextElement.style.animation = 'fadeIn 0.5s ease-in-out';
+            
+            pageNumElement.innerText = `صفحة ${currentPage + 1} من ${pages.length}`;
+
+            prevBtn.disabled = (currentPage === 0);
+            nextBtn.disabled = (currentPage === pages.length - 1);
+        }
+
+        function nextPage() {
+            if (currentPage < pages.length - 1) {
+                currentPage++;
+                updateBook();
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 0) {
+                currentPage--;
+                updateBook();
+            }
+        }
+
+        function createHearts() {
+            const container = document.getElementById('hearts-container');
+            for (let i = 0; i < 25; i++) {
+                let heart = document.createElement('div');
+                heart.className = 'heart-bg';
+                heart.innerText = '♥';
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.top = Math.random() * -20 + 'vh';
+                heart.style.animationDuration = (Math.random() * 3 + 4) + 's';
+                heart.style.animationDelay = Math.random() * 5 + 's';
+                heart.style.fontSize = (Math.random() * 15 + 15) + 'px';
+                container.appendChild(heart);
+            }
+        }
+        createHearts();
+    </script>
+</body>
+</html>
